@@ -37,7 +37,8 @@ const userStats = {
     ovoz_himoya_active: getQueryParam('ovoz_himoya_active', 'true') === 'true',
     miltiq_active: getQueryParam('miltiq_active', 'true') === 'true',
     maska_active: getQueryParam('maska_active', 'true') === 'true',
-    soxta_hujjat_active: getQueryParam('soxta_hujjat_active', 'true') === 'true'
+    soxta_hujjat_active: getQueryParam('soxta_hujjat_active', 'true') === 'true',
+    sub_type: getQueryParam('sub_type', 'free')
 };
 
 // Global Stats parsed from URL query parameters
