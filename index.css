@@ -765,3 +765,20 @@ input:disabled+.slider {
 .text-gold {
     color: #ffd700 !important;
 }
+
+.text-avatar-circle {
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    border: 2px solid var(--accent);
+    box-shadow: 0 0 15px var(--accent-glow);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    font-family: 'Outfit', sans-serif;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
