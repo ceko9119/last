@@ -64,16 +64,16 @@ function calculateRankAndLevel() {
     let rank = "Novice";
     let levelTitle = "Daraja: Oddiy o'yinchi";
 
-    if (wins >= 15) {
+    if (wins >= 100) {
         rank = "DON 👑";
         levelTitle = "Daraja: Boss (Don)";
-    } else if (wins >= 10) {
+    } else if (wins >= 75) {
         rank = "MANIAK 🔪";
         levelTitle = "Daraja: Professional qotil";
-    } else if (wins >= 5) {
+    } else if (wins >= 50) {
         rank = "KOMISSAR 👮";
         levelTitle = "Daraja: Tajribali izquvar";
-    } else if (wins >= 2) {
+    } else if (wins >= 20) {
         rank = "SHERIK 🤝";
         levelTitle = "Daraja: Shaharlik";
     }
@@ -92,13 +92,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const isVip = userStats.sub_type === 'vip';
     let displayName = "";
+    let photoUrl = null;
     if (tg && tg.initDataUnsafe && tg.initDataUnsafe.user) {
         const tgUser = tg.initDataUnsafe.user;
         displayName = tgUser.first_name + (tgUser.last_name ? ' ' + tgUser.last_name : '');
         userUsernameEl.textContent = tgUser.username ? '@' + tgUser.username : '';
-        if (tgUser.photo_url) {
-            avatarImgEl.src = tgUser.photo_url;
-        }
+        photoUrl = tgUser.photo_url;
     } else {
         displayName = userStats.first_name;
         userUsernameEl.textContent = '@' + userStats.username;
@@ -108,6 +107,36 @@ document.addEventListener('DOMContentLoaded', () => {
         userNameEl.innerHTML = `${displayName} <span class="vip-text-badge">👑 VIP</span>`;
     } else {
         userNameEl.textContent = displayName;
+    }
+
+    // Render avatar
+    if (photoUrl) {
+        avatarImgEl.src = photoUrl;
+        avatarImgEl.style.display = 'block';
+        const oldTextAv = document.getElementById('text-avatar');
+        if (oldTextAv) oldTextAv.remove();
+    } else {
+        avatarImgEl.style.display = 'none';
+        let textAv = document.getElementById('text-avatar');
+        if (!textAv) {
+            textAv = document.createElement('div');
+            textAv.id = 'text-avatar';
+            textAv.className = 'text-avatar-circle';
+            avatarImgEl.parentNode.insertBefore(textAv, avatarImgEl);
+        }
+        const firstLetter = displayName.trim().charAt(0).toUpperCase() || 'M';
+        textAv.textContent = firstLetter;
+
+        const colors = [
+            'linear-gradient(135deg, #f43f5e, #be123c)',
+            'linear-gradient(135deg, #10b981, #047857)',
+            'linear-gradient(135deg, #3b82f6, #1d4ed8)',
+            'linear-gradient(135deg, #eab308, #a16207)',
+            'linear-gradient(135deg, #8b5cf6, #5b21b6)',
+            'linear-gradient(135deg, #ec4899, #be185d)'
+        ];
+        const colorIdx = firstLetter.charCodeAt(0) % colors.length;
+        textAv.style.background = colors[colorIdx];
     }
 
     // Set Rank & XP
