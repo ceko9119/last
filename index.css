@@ -747,7 +747,8 @@ input:disabled+.slider {
 
 .vip-text-badge {
     background: linear-gradient(135deg, #ffd700, #ffa500);
-    color: #000 !important;
+    color: #000000 !important;
+    -webkit-text-fill-color: #000000 !important;
     font-size: 0.65rem;
     font-weight: 900;
     padding: 2px 6px;
@@ -757,6 +758,8 @@ input:disabled+.slider {
     text-transform: uppercase;
     box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
     display: inline-block;
+    background-clip: unset !important;
+    -webkit-background-clip: border-box !important;
 }
 
 .text-gold {
