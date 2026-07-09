@@ -30,6 +30,9 @@ const userStats = {
     miltiq: parseInt(getQueryParam('miltiq', '1')),
     maska: parseInt(getQueryParam('maska', '0')),
     soxta_hujjat: parseInt(getQueryParam('soxta_hujjat', '3')),
+    dori_himoya: parseInt(getQueryParam('dori_himoya', '0')),
+    slip_himoya: parseInt(getQueryParam('slip_himoya', '0')),
+    geroy_himoya: parseInt(getQueryParam('geroy_himoya', '0')),
 
     // Active toggles
     himoya_active: getQueryParam('himoya_active', 'true') === 'true',
@@ -38,6 +41,10 @@ const userStats = {
     miltiq_active: getQueryParam('miltiq_active', 'true') === 'true',
     maska_active: getQueryParam('maska_active', 'true') === 'true',
     soxta_hujjat_active: getQueryParam('soxta_hujjat_active', 'true') === 'true',
+    dori_himoya_active: getQueryParam('dori_himoya_active', 'true') === 'true',
+    slip_himoya_active: getQueryParam('slip_himoya_active', 'true') === 'true',
+    geroy_himoya_active: getQueryParam('geroy_himoya_active', 'true') === 'true',
+    has_geroy: getQueryParam('has_geroy', 'false') === 'true',
     sub_type: getQueryParam('sub_type', 'free')
 };
 
@@ -47,14 +54,20 @@ const globalStats = {
     total_users: parseInt(getQueryParam('total_users', '0'))
 };
 
-// Item configurations
+// Item configurations (Prices aligned with empire2 bot configs and user screenshot)
 const itemsConfig = {
-    himoya: { name: "🛡 Himoya", emoji: "🛡", description: "Mafiyadan tun davomida himoyalanish", price: 190, currency: "dollar" },
-    qotil_himoya: { name: "⛑️ Qotildan himoya", emoji: "⛑️", description: "Maniakdan tun davomida himoyalanish", price: 2, currency: "diamond" },
-    ovoz_himoya: { name: "⚖️ Ovoz berish himoyasi", emoji: "⚖️", description: "Kunduzgi ovoz berishda himoya", price: 1, currency: "diamond" },
-    miltiq: { name: "🔫 Miltiq", emoji: "🔫", description: "Tungi otishda foydalanish", price: 1, currency: "diamond" },
-    maska: { name: "🎭 Maska", emoji: "🎭", description: "Dondan shaxsingizni yashirish", price: 100, currency: "dollar" },
-    soxta_hujjat: { name: "📁 Soxta hujjat", emoji: "📁", description: "Komissardan shaxsingizni yashirish", price: 190, currency: "dollar" }
+    himoya: { name: "🛡 Himoya", emoji: "🛡", description: "Bir marta hayotingizni saqlab qoladi.", price: 100, currency: "dollar" },
+    soxta_hujjat: { name: "📁 Soxta hujjat", emoji: "📁", description: "Rol tekshiruvida soxta rol ko'rsatadi.", price: 190, currency: "dollar" },
+    ovoz_himoya: { name: "⚖️ Ovozdan himoya", emoji: "⚖️", description: "Sizni osishdan bir marta qutqaradi.", price: 1, currency: "diamond" },
+    miltiq: { name: "🔫 Miltiq", emoji: "🔫", description: "Hujumni himoyasini yorib o'tishga yordam beradi.", price: 1, currency: "diamond" },
+    dori_himoya: { name: "💊 Doridan himoya", emoji: "💊", description: "Kezuvchining dorisidan himoya qiladi!", price: 100, currency: "dollar" },
+    maska: { name: "🎭 Maska", emoji: "🎭", description: "Buni olsangiz daydi sizni taniy olmaydi!", price: 100, currency: "dollar" },
+    qotil_himoya: { name: "⛑️ Qotildan himoya", emoji: "⛑️", description: "Qotil va yollanma qotildan cheksiz himoya.", price: 2, currency: "diamond" },
+    slip_himoya: { name: "🪤 Sirpanishdan himoya", emoji: "🪤", description: "Sirpanib o'lishdan saqlab qoladi.", price: 300, currency: "dollar" },
+    geroy_himoya: { name: "🔰 Geroydan himoya", emoji: "🔰", description: "Geroydan har qanday hujumdan saqlaydi.", price: 7, currency: "diamond" },
+    replace_profile: { name: "🔄 Profil almashish", emoji: "🔄", description: "Profilni boshqa foydalanuvchi bilan almashtirish.", price: 5, currency: "diamond" },
+    geroy: { name: "🥷 Geroy roli", emoji: "🥷", description: "Sizga tong vaqtida ham otish imkonini beradi.", price: 90, currency: "diamond" },
+    custom_emoji: { name: "✨ VIP emoji o'zgartirish", emoji: "✨", description: "Ismingiz yoniga istalgan premium emoji qo'yish.", price: 1, currency: "diamond" }
 };
 
 // Calculate Rank and Level Progress
@@ -104,7 +117,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (isVip) {
-        userNameEl.innerHTML = `${displayName} <span class="vip-text-badge">👑 VIP</span>`;
+        userNameEl.innerHTML = `${displayName} <span class="vip-star-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 0L15 7.5L23 8L17 13.5L19 21.5L12 17.5L5 21.5L7 13.5L1 8L9 7.5L12 0Z" fill="url(#premiumGrad)"/><defs><linearGradient id="premiumGrad" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse"><stop stop-color="#aa00ff"/><stop offset="0.5" stop-color="#ff007f"/><stop offset="1" stop-color="#00c8ff"/></linearGradient></defs></svg></span> <span class="vip-text-badge">👑 VIP</span>`;
     } else {
         userNameEl.textContent = displayName;
     }
@@ -181,6 +194,7 @@ function renderInventory() {
     container.innerHTML = '';
 
     Object.keys(itemsConfig).forEach(key => {
+        if (key === 'custom_emoji' || key === 'replace_profile' || key === 'geroy') return;
         const item = itemsConfig[key];
         const qty = userStats[key];
         const isActive = userStats[key + '_active'];
@@ -246,7 +260,7 @@ function renderSubUpgrades() {
             id: 'vip',
             name: '👑 VIP Status',
             desc: 'Rol tanlashda maksimal ustuvorlik • 25% chegirma • Ovoz berishda 2 ta ovoz • Neon profil ramkasi',
-            price: '45 💎',
+            price: '30 💎', // VIP cost in empire2 database is 30 diamonds
             btnText: 'Faollashtirish'
         });
     }
@@ -277,20 +291,10 @@ function renderShop() {
     container.innerHTML = '';
 
     Object.keys(itemsConfig).forEach(key => {
+        if (key === 'custom_emoji' && userStats.sub_type !== 'vip') return;
         const item = itemsConfig[key];
 
-        const sub = userStats.sub_type;
-        let finalPrice = item.price;
-        let originalPriceHtml = '';
-        let badgeHtml = '';
-
-        if (sub === 'vip') {
-            finalPrice = Math.round(item.price * 0.75);
-            originalPriceHtml = `<span class="original-price">${item.price} ${item.currency === 'dollar' ? '$' : '💎'}</span>`;
-            badgeHtml = `<span class="discount-badge">25% OFF</span>`;
-        }
-
-        const priceStr = item.currency === 'dollar' ? `${finalPrice} $` : `${finalPrice} 💎`;
+        const priceStr = item.currency === 'dollar' ? `${item.price} $` : `${item.price} 💎`;
         const priceClass = item.currency === 'diamond' ? 'diamond-price' : '';
 
         const card = document.createElement('div');
@@ -299,19 +303,27 @@ function renderShop() {
             <div class="shop-card-left">
                 <span class="item-icon">${item.emoji}</span>
                 <div class="shop-card-info">
-                    <span class="shop-card-title">${item.name} ${badgeHtml}</span>
-                    <span class="shop-card-price ${priceClass}">Narxi: ${originalPriceHtml} ${priceStr}</span>
+                    <span class="shop-card-title">${item.name}</span>
+                    <span class="shop-card-desc" style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 2px;">${item.description}</span>
+                    <span class="shop-card-price ${priceClass}">Narxi: ${priceStr}</span>
                 </div>
             </div>
             <button class="buy-btn" id="buy-${key}">Sotib olish</button>
         `;
         container.appendChild(card);
 
-        // Buy Event Listener
         const buyBtn = card.querySelector('button');
-        buyBtn.addEventListener('click', () => {
-            handleBuy(key);
-        });
+        if (key === 'geroy' && userStats.has_geroy) {
+            buyBtn.textContent = "SOTIB OLINGAN";
+            buyBtn.disabled = true;
+            buyBtn.style.background = "#5b21b6";
+            buyBtn.style.cursor = "default";
+            buyBtn.style.boxShadow = "none";
+        } else {
+            buyBtn.addEventListener('click', () => {
+                handleBuy(key);
+            });
+        }
     });
 }
 
@@ -332,6 +344,7 @@ function handleToggle(itemKey) {
     }
 }
 
+// buy item action
 function handleBuy(itemKey) {
     const item = itemsConfig[itemKey];
     const data = {
@@ -351,6 +364,7 @@ function handleBuy(itemKey) {
     }
 }
 
+// upgrade to VIP tier
 function handleUpgrade(tier) {
     const data = {
         action: "upgrade",
