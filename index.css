@@ -23,7 +23,11 @@
 }
 
 body {
-    background-color: var(--bg-dark);
+    background-image: linear-gradient(rgba(7, 3, 17, 0.78), rgba(7, 3, 17, 0.88)), url('mafia_bg.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
     color: var(--text-primary);
     min-height: 100vh;
     padding: 16px;
