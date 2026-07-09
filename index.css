@@ -782,3 +782,16 @@ input:disabled+.slider {
     font-family: 'Outfit', sans-serif;
     text-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
+
+.vip-star-icon {
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 6px;
+    filter: drop-shadow(0 0 4px rgba(217, 70, 239, 0.6));
+    animation: vipPulse 2s infinite ease-in-out;
+}
+
+@keyframes vipPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); filter: drop-shadow(0 0 8px rgba(217, 70, 239, 0.9)); }
+}
