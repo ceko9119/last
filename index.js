@@ -327,6 +327,39 @@ function renderShop() {
     });
 }
 
+// Helper to send action to bot
+function sendAction(data) {
+    if (!tg) {
+        alert(`Faqat Telegram ichida ishlaydi:\n${JSON.stringify(data)}`);
+        return;
+    }
+    
+    // Check if opened via Inline button (query_id exists)
+    if (tg.initDataUnsafe && tg.initDataUnsafe.query_id) {
+        const botUsername = getQueryParam('bot', 'NeoMafia_bot');
+        const payload = btoa(JSON.stringify(data))
+            .replace(/=/g, '')
+            .replace(/\+/g, '-')
+            .replace(/\//g, '_'); // URL-safe base64
+        tg.openTelegramLink(`https://t.me/${botUsername}?start=wa_${payload}`);
+        tg.close();
+    } else {
+        try {
+            tg.sendData(JSON.stringify(data));
+            tg.close();
+        } catch (e) {
+            // Fallback to deep link if sendData is blocked
+            const botUsername = getQueryParam('bot', 'NeoMafia_bot');
+            const payload = btoa(JSON.stringify(data))
+                .replace(/=/g, '')
+                .replace(/\+/g, '-')
+                .replace(/\//g, '_');
+            tg.openTelegramLink(`https://t.me/${botUsername}?start=wa_${payload}`);
+            tg.close();
+        }
+    }
+}
+
 // Action Handlers
 function handleToggle(itemKey) {
     const nextState = !userStats[itemKey + '_active'];
@@ -336,12 +369,7 @@ function handleToggle(itemKey) {
         action: "toggle",
         item: itemKey
     };
-
-    if (tg) {
-        tg.sendData(JSON.stringify(data));
-    } else {
-        alert(`Faqat Telegram ichida ishlaydi:\nToggle ${itemKey} ➡️ ${nextState}`);
-    }
+    sendAction(data);
 }
 
 // buy item action
@@ -353,15 +381,7 @@ function handleBuy(itemKey) {
         price: item.price,
         currency: item.currency
     };
-
-    if (tg) {
-        tg.sendData(JSON.stringify(data));
-    } else {
-        const confirmBuy = confirm(`${item.name} sotib olishni tasdiqlaysizmi?\nNarxi: ${item.price} ${item.currency}`);
-        if (confirmBuy) {
-            alert(`Faqat Telegram ichida ishlaydi:\nXarid qilindi: ${item.name}`);
-        }
-    }
+    sendAction(data);
 }
 
 // upgrade to VIP tier
@@ -370,10 +390,6 @@ function handleUpgrade(tier) {
         action: "upgrade",
         tier: tier
     };
-
-    if (tg) {
-        tg.sendData(JSON.stringify(data));
-    } else {
-        alert(`Faqat Telegram ichida ishlaydi:\nUpgrade to ${tier.toUpperCase()}`);
-    }
+    sendAction(data);
 }
+
