@@ -21,106 +21,149 @@
     <div class="glow-orb orb-2"></div>
 
     <div class="app-container">
-        <!-- Premium Profile Header -->
-        <header class="profile-header">
-            <div class="user-row">
-                <div class="avatar-container">
-                    <img id="user-avatar" src="https://img.icons8.com/clouds/100/username.png" alt="Avatar">
-                    <span class="rank-badge" id="rank-badge">Gamer</span>
+        <!-- Tab 1: Kabinet -->
+        <div id="tab-profile" class="tab-content active">
+            <!-- Premium Profile Header -->
+            <header class="profile-header">
+                <div class="user-row">
+                    <div class="avatar-container">
+                        <img id="user-avatar" src="https://img.icons8.com/clouds/100/username.png" alt="Avatar">
+                        <span class="rank-badge" id="rank-badge">Gamer</span>
+                    </div>
+                    <div class="user-details">
+                        <h2 id="user-name">Yuklanmoqda...</h2>
+                        <span id="user-username">@username</span>
+                    </div>
                 </div>
-                <div class="user-details">
-                    <h2 id="user-name">Yuklanmoqda...</h2>
-                    <span id="user-username">@username</span>
+
+                <!-- Level / XP Progress Bar -->
+                <div class="xp-container">
+                    <div class="xp-labels">
+                        <span class="xp-level" id="xp-level-title">Daraja: Mafiya</span>
+                        <span class="xp-pct" id="xp-pct-val">65%</span>
+                    </div>
+                    <div class="xp-bar-bg">
+                        <div class="xp-bar-fill" id="xp-bar-fill" style="width: 65%;"></div>
+                    </div>
+                </div>
+                
+                <div class="balance-cards">
+                    <div class="balance-card dollars">
+                        <div class="icon-circle gold-circle">
+                            <i class="fa-solid fa-sack-dollar"></i>
+                        </div>
+                        <div class="balance-info">
+                            <span class="label">Dollar</span>
+                            <span id="bal-dollars" class="value">0 $</span>
+                        </div>
+                    </div>
+                    <div class="balance-card diamonds">
+                        <div class="icon-circle cyan-circle">
+                            <i class="fa-solid fa-gem"></i>
+                        </div>
+                        <div class="balance-info">
+                            <span class="label">Olmos</span>
+                            <span id="bal-diamonds" class="value">0 💎</span>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Global Server Stats -->
+            <div class="global-stats-row card-slide">
+                <div class="gstat-item">
+                    <span class="pulse-indicator"></span>
+                    <span>Faol o'yinlar: <b id="global-active-games">0</b> ta</span>
+                </div>
+                <div class="gstat-item">
+                    <i class="fa-solid fa-users text-cyan"></i>
+                    <span>Foydalanuvchilar: <b id="global-total-users">0</b> ta</span>
                 </div>
             </div>
 
-            <!-- Level / XP Progress Bar -->
-            <div class="xp-container">
-                <div class="xp-labels">
-                    <span class="xp-level" id="xp-level-title">Daraja: Mafiya</span>
-                    <span class="xp-pct" id="xp-pct-val">65%</span>
+            <!-- Status Upgrade Section -->
+            <section class="section-container card-slide" id="subscription-upgrade-section">
+                <h3 class="section-title"><i class="fa-solid fa-bolt"></i> Premium Super Kuchlar</h3>
+                <div class="subs-grid" id="subs-container">
+                    <!-- Will be dynamically populated by JS -->
                 </div>
-                <div class="xp-bar-bg">
-                    <div class="xp-bar-fill" id="xp-bar-fill" style="width: 65%;"></div>
-                </div>
-            </div>
-            
-            <div class="balance-cards">
-                <div class="balance-card dollars">
-                    <div class="icon-circle gold-circle">
-                        <i class="fa-solid fa-sack-dollar"></i>
-                    </div>
-                    <div class="balance-info">
-                        <span class="label">Dollar</span>
-                        <span id="bal-dollars" class="value">0 $</span>
-                    </div>
-                </div>
-                <div class="balance-card diamonds">
-                    <div class="icon-circle cyan-circle">
-                        <i class="fa-solid fa-gem"></i>
-                    </div>
-                    <div class="balance-info">
-                        <span class="label">Olmos</span>
-                        <span id="bal-diamonds" class="value">0 💎</span>
-                    </div>
-                </div>
-            </div>
-        </header>
+            </section>
 
-        <!-- Global Server Stats -->
-        <div class="global-stats-row card-slide">
-            <div class="gstat-item">
-                <span class="pulse-indicator"></span>
-                <span>Faol o'yinlar: <b id="global-active-games">0</b> ta</span>
-            </div>
-            <div class="gstat-item">
-                <i class="fa-solid fa-users text-cyan"></i>
-                <span>Foydalanuvchilar: <b id="global-total-users">0</b> ta</span>
-            </div>
+            <!-- Stats Section -->
+            <section class="section-container card-slide">
+                <h3 class="section-title"><i class="fa-solid fa-chart-simple"></i> Jang Statistikasi</h3>
+                <div class="stats-grid">
+                    <div class="stat-box">
+                        <span class="stat-val" id="stat-games">0</span>
+                        <span class="stat-label">Jami O'yinlar</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-val success" id="stat-wins">0</span>
+                        <span class="stat-label">G'alabalar</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-val danger" id="stat-losses">0</span>
+                        <span class="stat-label">Mag'lubiyatlar</span>
+                    </div>
+                </div>
+            </section>
         </div>
 
-        <!-- Status Upgrade Section -->
-        <section class="section-container card-slide" id="subscription-upgrade-section">
-            <h3 class="section-title"><i class="fa-solid fa-bolt"></i> Premium Super Kuchlar</h3>
-            <div class="subs-grid" id="subs-container">
-                <!-- Will be dynamically populated by JS -->
-            </div>
-        </section>
-
-        <!-- Stats Section -->
-        <section class="section-container card-slide">
-            <h3 class="section-title"><i class="fa-solid fa-chart-simple"></i> Jang Statistikasi</h3>
-            <div class="stats-grid">
-                <div class="stat-box">
-                    <span class="stat-val" id="stat-games">0</span>
-                    <span class="stat-label">Jami O'yinlar</span>
+        <!-- Tab 2: Rollar -->
+        <div id="tab-roles" class="tab-content">
+            <!-- Roles Section -->
+            <section class="section-container card-slide">
+                <h3 class="section-title"><i class="fa-solid fa-mask"></i> O'yin Rollari</h3>
+                <div class="roles-search-container">
+                    <input type="text" id="roles-search" placeholder="Rol nomini qidirish...">
                 </div>
-                <div class="stat-box">
-                    <span class="stat-val success" id="stat-wins">0</span>
-                    <span class="stat-label">G'alabalar</span>
+                <div class="roles-list" id="roles-container">
+                    <!-- Roles will be dynamically generated by JS -->
                 </div>
-                <div class="stat-box">
-                    <span class="stat-val danger" id="stat-losses">0</span>
-                    <span class="stat-label">Mag'lubiyatlar</span>
+            </section>
+        </div>
+
+        <!-- Tab 3: Inventar -->
+        <div id="tab-inventory" class="tab-content">
+            <!-- Inventory / Active States -->
+            <section class="section-container card-slide">
+                <h3 class="section-title"><i class="fa-solid fa-briefcase"></i> Shaxsiy Inventar</h3>
+                <div class="inventory-list" id="inventory-container">
+                    <!-- Items will be generated by JS -->
                 </div>
-            </div>
-        </section>
+            </section>
+        </div>
 
-        <!-- Inventory / Active States -->
-        <section class="section-container card-slide">
-            <h3 class="section-title"><i class="fa-solid fa-briefcase"></i> Shaxsiy Inventar</h3>
-            <div class="inventory-list" id="inventory-container">
-                <!-- Items will be generated by JS -->
-            </div>
-        </section>
+        <!-- Tab 4: Do'kon -->
+        <div id="tab-shop" class="tab-content">
+            <!-- Shop Section -->
+            <section class="section-container card-slide">
+                <h3 class="section-title"><i class="fa-solid fa-store"></i> Qurol-Yarog' Do'koni</h3>
+                <div class="shop-grid" id="shop-container">
+                    <!-- Shop cards will be generated by JS -->
+                </div>
+            </section>
+        </div>
 
-        <!-- Shop Section -->
-        <section class="section-container card-slide">
-            <h3 class="section-title"><i class="fa-solid fa-store"></i> Qurol-Yarog' Do'koni</h3>
-            <div class="shop-grid" id="shop-container">
-                <!-- Shop cards will be generated by JS -->
+        <!-- Sticky Bottom Navigation Bar -->
+        <nav class="bottom-nav">
+            <div class="nav-item active" onclick="switchTab('profile')">
+                <i class="fa-solid fa-user"></i>
+                <span>Kabinet</span>
             </div>
-        </section>
+            <div class="nav-item" onclick="switchTab('roles')">
+                <i class="fa-solid fa-mask"></i>
+                <span>Rollar</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('inventory')">
+                <i class="fa-solid fa-briefcase"></i>
+                <span>Inventar</span>
+            </div>
+            <div class="nav-item" onclick="switchTab('shop')">
+                <i class="fa-solid fa-store"></i>
+                <span>Do'kon</span>
+            </div>
+        </nav>
     </div>
 
     <script src="index.js"></script>
