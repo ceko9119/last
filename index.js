@@ -186,6 +186,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Render Shop
     renderShop();
+
+    // Render Roles List
+    renderRoles();
+    const searchInput = document.getElementById('roles-search');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            renderRoles(e.target.value);
+        });
+    }
 });
 
 // Render Inventory function
@@ -218,8 +227,8 @@ function renderInventory() {
 
         // Toggle Event Listener
         const toggleInput = itemDiv.querySelector('input');
-        toggleInput.addEventListener('change', () => {
-            handleToggle(key);
+        toggleInput.addEventListener('change', (e) => {
+            handleToggle(key, e);
         });
     });
 }
@@ -260,7 +269,7 @@ function renderSubUpgrades() {
             id: 'vip',
             name: '👑 VIP Status',
             desc: 'Rol tanlashda maksimal ustuvorlik • 25% chegirma • Ovoz berishda 2 ta ovoz • Neon profil ramkasi',
-            price: '30 💎', // VIP cost in empire2 database is 30 diamonds
+            price: '30 💎', 
             btnText: 'Faollashtirish'
         });
     }
@@ -279,8 +288,8 @@ function renderSubUpgrades() {
         container.appendChild(card);
 
         const btn = card.querySelector('button');
-        btn.addEventListener('click', () => {
-            handleUpgrade(tier.id);
+        btn.addEventListener('click', (e) => {
+            handleUpgrade(tier.id, e);
         });
     });
 }
@@ -320,27 +329,124 @@ function renderShop() {
             buyBtn.style.cursor = "default";
             buyBtn.style.boxShadow = "none";
         } else {
-            buyBtn.addEventListener('click', () => {
-                handleBuy(key);
+            buyBtn.addEventListener('click', (e) => {
+                handleBuy(key, e);
             });
         }
     });
 }
 
+// Toast notification helper
+function showToast(message, isSuccess = true) {
+    const toast = document.createElement('div');
+    toast.className = `toast-notification ${isSuccess ? 'success' : 'error'}`;
+    toast.innerHTML = `
+        <div class="toast-content">
+            <i class="fa-solid ${isSuccess ? 'fa-circle-check' : 'fa-circle-exclamation'}"></i>
+            <span>${message}</span>
+        </div>
+    `;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.classList.add('active');
+    }, 10);
+    
+    setTimeout(() => {
+        toast.classList.remove('active');
+        setTimeout(() => {
+            toast.remove();
+        }, 300);
+    }, 3000);
+}
+
 // Helper to send action to bot
-function sendAction(data) {
+function sendAction(data, event) {
+    data.uid = userStats.uid;
+    const apiUrl = getQueryParam('api', '');
+
+    if (apiUrl) {
+        let targetEl = event ? (event.target || event.srcElement) : null;
+        let originalText = "";
+        let isCheckbox = false;
+
+        if (targetEl) {
+            if (targetEl.tagName === 'BUTTON') {
+                originalText = targetEl.textContent;
+                targetEl.textContent = "Yuklanmoqda...";
+                targetEl.disabled = true;
+            } else if (targetEl.tagName === 'INPUT' && targetEl.type === 'checkbox') {
+                isCheckbox = true;
+                targetEl.disabled = true;
+            }
+        }
+
+        fetch(`${apiUrl}/api/webapp_action`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(res => res.json())
+        .then(resData => {
+            if (targetEl) {
+                targetEl.disabled = false;
+                if (targetEl.tagName === 'BUTTON') {
+                    targetEl.textContent = originalText;
+                }
+            }
+
+            if (resData.ok) {
+                // Sync userStats from API response
+                Object.keys(resData.profile).forEach(k => {
+                    userStats[k] = resData.profile[k];
+                });
+                
+                // Re-render UI balances
+                document.getElementById('bal-dollars').textContent = userStats.dollars + ' $';
+                document.getElementById('bal-diamonds').textContent = userStats.diamonds + ' 💎';
+                
+                renderInventory();
+                renderShop();
+                renderSubUpgrades();
+
+                showToast(resData.message || "Muvaffaqiyatli bajarildi!", true);
+            } else {
+                if (isCheckbox) {
+                    targetEl.checked = !targetEl.checked;
+                }
+                showToast(resData.error || "Xatolik yuz berdi.", false);
+            }
+        })
+        .catch(err => {
+            if (targetEl) {
+                targetEl.disabled = false;
+                if (targetEl.tagName === 'BUTTON') {
+                    targetEl.textContent = originalText;
+                } else if (isCheckbox) {
+                    targetEl.checked = !targetEl.checked;
+                }
+            }
+            showToast("Tarmoq xatoligi. Serverga ulanib bo'lmadi.", false);
+            console.error("API error:", err);
+        });
+
+        return; // Stay inside WebApp
+    }
+
     if (!tg) {
         alert(`Faqat Telegram ichida ishlaydi:\n${JSON.stringify(data)}`);
         return;
     }
     
-    // Check if opened via Inline button (query_id exists)
+    // Fallback: Check if opened via Inline button (query_id exists)
     if (tg.initDataUnsafe && tg.initDataUnsafe.query_id) {
         const botUsername = getQueryParam('bot', 'NeoMafia_bot');
         const payload = btoa(JSON.stringify(data))
             .replace(/=/g, '')
             .replace(/\+/g, '-')
-            .replace(/\//g, '_'); // URL-safe base64
+            .replace(/\//g, '_'); 
         tg.openTelegramLink(`https://t.me/${botUsername}?start=wa_${payload}`);
         tg.close();
     } else {
@@ -348,7 +454,6 @@ function sendAction(data) {
             tg.sendData(JSON.stringify(data));
             tg.close();
         } catch (e) {
-            // Fallback to deep link if sendData is blocked
             const botUsername = getQueryParam('bot', 'NeoMafia_bot');
             const payload = btoa(JSON.stringify(data))
                 .replace(/=/g, '')
@@ -361,7 +466,7 @@ function sendAction(data) {
 }
 
 // Action Handlers
-function handleToggle(itemKey) {
+function handleToggle(itemKey, event) {
     const nextState = !userStats[itemKey + '_active'];
     userStats[itemKey + '_active'] = nextState;
 
@@ -369,11 +474,11 @@ function handleToggle(itemKey) {
         action: "toggle",
         item: itemKey
     };
-    sendAction(data);
+    sendAction(data, event);
 }
 
 // buy item action
-function handleBuy(itemKey) {
+function handleBuy(itemKey, event) {
     const item = itemsConfig[itemKey];
     const data = {
         action: "buy",
@@ -381,15 +486,128 @@ function handleBuy(itemKey) {
         price: item.price,
         currency: item.currency
     };
-    sendAction(data);
+    sendAction(data, event);
 }
 
 // upgrade to VIP tier
-function handleUpgrade(tier) {
+function handleUpgrade(tier, event) {
     const data = {
         action: "upgrade",
         tier: tier
     };
-    sendAction(data);
+    sendAction(data, event);
 }
 
+// Configured Roles list with premium emoji IDs
+const rolesConfig = [
+    { name: "Don", emoji: "🤵", emojiId: "5260663153175329291", side: "mafia", desc: "Mafialar sardori. Har tun kim o'lishini belgilaydi." },
+    { name: "Mafiya A'zosi", emoji: "🤵", emojiId: "5258439120325212178", side: "mafia", desc: "Don buyrug'ini bajaredi va tunda birga ovga chiqadi." },
+    { name: "Komissar katani", emoji: "🕵", emojiId: "5260328897345516291", side: "tinch", desc: "Shaharning asosiy himoyachisi va mafiya kushandasi." },
+    { name: "Doktor", emoji: "👨", emojiId: "5258191399496480198", side: "tinch", desc: "Har tun bir kishini davolab o'limdan saqlab qoladi." },
+    { name: "Serjant", emoji: "👮", emojiId: "5258271337427794186", side: "tinch", desc: "Komissar yordamchisi. U vafot etsa o'rnini egallaydi." },
+    { name: "Tinch aholi", emoji: "👨", emojiId: "5260416853980768927", side: "tinch", desc: "Vazifasi ovoz berish jarayonida mafiyani osish." },
+    { name: "Daydi", emoji: "🧙", emojiId: "5258236913264915905", side: "tinch", desc: "Tunda kimnidir kuzatib qotillik guvohi bo'lishi mumkin." },
+    { name: "Kezuvchi", emoji: "💃", emojiId: "5260588347729933848", side: "tinch", desc: "Tunda kimnidir uxlatib qo'yadi, u bir kun o'ynolmaydi." },
+    { name: "Advokat", emoji: "👨", emojiId: "5260325916638213638", side: "mafia", desc: "Tunda kimni himoya qilsa, komissar uni tinch ko'radi." },
+    { name: "Suidsid", emoji: "🩸", emojiId: "5260229361478431704", side: "erkin", desc: "Agar o'yinda uni osib o'ldirishsa, u yutadi." },
+    { name: "Omadli", emoji: "🤞", emojiId: "5258412890959933472", side: "tinch", desc: "Tinch aholi. O'limdan qolish ehtimoli juda yuqori." },
+    { name: "Janob", emoji: "🎖️", emojiId: "5260209875211814482", side: "tinch", desc: "Ovoz berishda ovozi 2 ta hisoblanadi va shaxsi yopiq bo'ladi." },
+    { name: "Bo'ri", emoji: "🐺", emojiId: "5341595120309411999", side: "erkin", desc: "Mafiya o'ldirsa mafiya, Komissar o'ldirsa serjant bo'ladi." },
+    { name: "Qotil", emoji: "🔪", emojiId: "5260640922424604998", side: "erkin", desc: "Shaxardagi hamma o'lishi kerak, o'zidan tashqari." },
+    { name: "Yollanma qotil", emoji: "🕴️", emojiId: "5260599918371829966", side: "tinch", desc: "Har tun bir kishini o'ldirishi mumkin, mafiya va tinchni yo'q qiladi." },
+    { name: "Aferist", emoji: "🤹", emojiId: "5260514087745387364", side: "erkin", desc: "Tunda kimnidir tanlab, ismini yashirishi mumkin." },
+    { name: "G'azabkor", emoji: "🧟", emojiId: "5341360937217600570", side: "erkin", desc: "Uni o'ldirmoqchi bo'lganlardan qasos olish tanlovi beriladi." },
+    { name: "Sehrgar", emoji: "🧙", emojiId: "5260285737219157359", side: "tinch", desc: "Tunda ikki kishining rolarini o'zaro almashtiradi." },
+    { name: "Jurnalist", emoji: "👩‍💻", emojiId: "5260624713218027970", side: "mafia", desc: "Tunda kimnidir kuzatib mafiyaga xabar beradi." },
+    { name: "Sotqin", emoji: "🤓", emojiId: "5258016980874590233", side: "tinch", desc: "Tunda yovuzlarni topsa shaxsini yashirib sotishi mumkin." },
+    { name: "Qo'riqchi", emoji: "🛡️", emojiId: "5341766867461644729", side: "tinch", desc: "Tinch aholi. Har tun bir kishini himoya qiladi." },
+    { name: "Fotoparatchi", emoji: "📸", emojiId: "5451630137252554740", side: "tinch", desc: "Tunda kimnidir kuzatib kimning uyiga borganini rasmga oladi." },
+    { name: "Joker", emoji: "🤡", emojiId: null, side: "erkin", desc: "Tunda karta yuboradi, o'lim kartasini tanlagan o'yinchi o'ladi." },
+    { name: "Jin", emoji: "🧞", emojiId: null, side: "erkin", desc: "Tunda hayot, pul yoki qotillik tanlovini beradi." },
+    { name: "Admiral", emoji: "🚢", emojiId: null, side: "tinch", desc: "Komissar va serjant o'lmaguncha uni o'ldirib bo'lmaydi." },
+    { name: "Kimyogar", emoji: "🧪", emojiId: null, side: "erkin", desc: "Erkin rol, davolashi yoki o'ldirishi mumkin." },
+    { name: "Rais (Boy ota)", emoji: "💰", emojiId: null, side: "erkin", desc: "Tunda kimgadir 1-100 dollar tarqatadi." },
+    { name: "Minior", emoji: "💣", emojiId: null, side: "erkin", desc: "Tunda eshikka mina qo'yadi, kelganlar o'ladi." },
+    { name: "Robin Gud", emoji: "🏹", emojiId: null, side: "tinch", desc: "Tunda kimnidir o'ldirishi mumkin. 2 ta tinchni o'ldirsa o'zi o'ladi." },
+    { name: "Ayg'oqchi", emoji: "🦅", emojiId: null, side: "mafia", desc: "Tunda bir o'yinchining rolini bilib mafiyaga aytadi." },
+    { name: "Konchi", emoji: "⛏", emojiId: null, side: "erkin", desc: "Tunda kondan olmos, pul yoki o'lim topadi." },
+    { name: "Qaroqchi", emoji: "⚔️", emojiId: null, side: "erkin", desc: "Tunda pul yoki olmos o'g'irlaydi." },
+    { name: "Zombi", emoji: "🧟", emojiId: null, side: "erkin", desc: "Shahardagi barcha odamlarni zombiga aylantirishi kerak." },
+    { name: "Labarant", emoji: "🥽", emojiId: null, side: "mafia", desc: "Mafiyani himoya qiladi, boshqalarni o'ldira oladi." },
+    { name: "Hamshira", emoji: "🩺", emojiId: null, side: "tinch", desc: "Doktor o'lsa o'rniga doktor bo'ladi." },
+    { name: "Koldun", emoji: "⚡️", emojiId: null, side: "tinch", desc: "Tinch bo'lsa osishdan himoyalaydi, mafiya bo'lsa o'ldiradi." },
+    { name: "Qorbobo", emoji: "❄️", emojiId: null, side: "erkin", desc: "Tunda odamlarga qurol va faol rollar sovg'a qiladi." },
+    { name: "Tulki", emoji: "🦊", emojiId: null, side: "erkin", desc: "Bir marta kimnidir tanlab o'sha tarafga o'tadi." },
+    { name: "Xoyin", emoji: "👺", emojiId: null, side: "tinch", desc: "Tunda mafiyani topsa mafiya bo'ladi, topolmasa o'ladi." },
+    { name: "Zanjir", emoji: "⛓", emojiId: null, side: "tinch", desc: "Ikki kishini bog'lab qo'yadi, biri o'lsa ikkinchisi ham o'ladi." },
+    { name: "Aktyor", emoji: "🎭", emojiId: null, side: "erkin", desc: "Har tun yangi rolda o'ynaydi." }
+];
+
+// Render Roles list
+function renderRoles(searchTerm = "") {
+    const container = document.getElementById('roles-container');
+    if (!container) return;
+    container.innerHTML = '';
+
+    const term = searchTerm.toLowerCase().trim();
+    const filtered = rolesConfig.filter(role => 
+        role.name.toLowerCase().includes(term) || 
+        role.desc.toLowerCase().includes(term)
+    );
+
+    if (filtered.length === 0) {
+        container.innerHTML = `<div style="text-align: center; color: var(--text-secondary); padding: 20px; border: 1px solid var(--card-border); border-radius: 12px;">Mos keladigan rol topilmadi.</div>`;
+        return;
+    }
+
+    filtered.forEach(role => {
+        const card = document.createElement('div');
+        card.className = 'role-card';
+        
+        let emojiHtml = "";
+        if (role.emojiId) {
+            emojiHtml = `<tg-emoji emoji-id="${role.emojiId}">${role.emoji}</tg-emoji>`;
+        } else {
+            emojiHtml = role.emoji;
+        }
+
+        const sideText = role.side === "mafia" ? "Mafiya" : (role.side === "tinch" ? "Tinch" : "Erkin");
+
+        card.innerHTML = `
+            <div class="role-emoji-container">
+                ${emojiHtml}
+            </div>
+            <div class="role-info">
+                <div class="role-header-row">
+                    <span class="role-name">${role.name}</span>
+                    <span class="role-side ${role.side}">${sideText}</span>
+                </div>
+                <div class="role-desc">${role.desc}</div>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+// Tab Switching logic
+function switchTab(tabId) {
+    // Hide all tab contents
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    // Remove active class from all nav items
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+    });
+
+    // Show selected tab content
+    const activeTab = document.getElementById(`tab-${tabId}`);
+    if (activeTab) {
+        activeTab.classList.add('active');
+    }
+    // Set active navigation item
+    const activeItem = document.querySelector(`.nav-item[onclick*="${tabId}"]`);
+    if (activeItem) {
+        activeItem.classList.add('active');
+    }
+}
