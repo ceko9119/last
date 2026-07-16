@@ -654,12 +654,24 @@ function renderRoles(searchTerm = "", sideFilter = "all") {
             "Virus": "virus.png",
             "Kissavur": "kissavur.png",
             "Gipnotizyor": "gipnotizyor.png",
-            "Terminator": "terminator.png"
+            "Terminator": "terminator.png",
+            "Qotil": "qotil.png",
+            "Serjant": "serjant.png",
+            "Janob": "janob.png",
+            "Tinch axoli": "fuqaro.png",
+            "Daydi": "daydi.png",
+            "Kezuvchi": "kezuvchi.png",
+            "Advokat": "advokat.png",
+            "Suidsid": "suidsid.png",
+            "Omadli": "omadli.png",
+            "Bo'ri": "bori.png",
+            "Yollanma qotil": "ovchi.png",
+            "Qasoskor": "qasoskor.png",
+            "Aferist": "aferist.png"
         };
 
-        const apiUrl = getQueryParam('api', '');
-        if (customImageRoles[role.name] && apiUrl) {
-            emojiHtml = `<img src="${apiUrl}/rollar/${customImageRoles[role.name]}" class="role-premium-img" style="width: 28px; height: 28px; object-fit: contain; border-radius: 4px;" />`;
+        if (customImageRoles[role.name]) {
+            emojiHtml = `<img src="rollar/${customImageRoles[role.name]}" class="role-premium-img" style="width: 28px; height: 28px; object-fit: contain; border-radius: 4px;" />`;
         } else if (role.emojiId) {
             emojiHtml = `<tg-emoji emoji-id="${role.emojiId}">${role.emoji}</tg-emoji>`;
         } else {
